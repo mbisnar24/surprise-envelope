@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="theme-color" content="#fff2f3">
+	<title>A little surprise for you</title>
+	<style>
+		:root {
+			color-scheme: light;
+			--ink: #542b46;
+			--muted: #936b83;
+			--rose: #e75478;
+			--rose-dark: #c73862;
+			--pink: #ffd6df;
+			--lilac: #e8d9fa;
+			--paper: #fffdfb;
+			--line: #f0d8e2;
+			--shadow: 0 24px 70px rgba(142, 75, 111, .15);
+		}
+
+		* { box-sizing: border-box; }
+
+		body {
+			margin: 0;
+			min-height: 100svh;
+			overflow-x: hidden;
+			color: var(--ink);
+			font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+			background:
+				radial-gradient(ellipse at 12% 18%, rgba(255, 208, 221, .72), transparent 30%),
+				radial-gradient(ellipse at 89% 82%, rgba(216, 199, 248, .65), transparent 32%),
+				linear-gradient(145deg, #fff8f2 0%, #fff0f5 54%, #f6efff 100%);
+		}
+
+		button, input { font: inherit; }
+
+		button {
+			min-height: 54px;
+			border: 0;
+			border-radius: 999px;
+			padding: 0 25px;
+			font-weight: 800;
+			cursor: pointer;
+			-webkit-tap-highlight-color: transparent;
+			transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+		}
+
+		button:focus-visible, input:focus-visible {
+			outline: 3px solid #b56aa5;
+			outline-offset: 4px;
+		}
+
+		button:hover { transform: translateY(-2px); }
+		button:active { transform: scale(.97); }
+
+		.scene {
+			position: relative;
+			display: grid;
+			min-height: 100svh;
+			place-items: center;
+			padding: 30px 20px;
+			isolation: isolate;
+		}
+
+		.scene::before, .scene::after {
+			position: absolute;
+			z-index: -1;
+			content: "";
+			width: 230px;
+			height: 230px;
+			border: 1px solid rgba(207, 137, 169, .19);
+			border-radius: 50%;
+			pointer-events: none;
+		}
+
+		.scene::before { top: -130px; left: -92px; box-shadow: 0 0 0 22px rgba(255,255,255,.14), 0 0 0 44px rgba(255,255,255,.1); }
+		.scene::after { right: -135px; bottom: -120px; width: 300px; height: 300px; }
+
+		.heart-field { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+		.float-heart {
+			position: absolute;
+			bottom: -45px;
+			color: rgba(222, 92, 132, .28);
+			font-size: var(--size);
+			animation: float-up var(--duration) linear infinite;
+			animation-delay: var(--delay);
+		}
+
+		@keyframes float-up {
+			from { transform: translate3d(0, 0, 0) rotate(-12deg); opacity: 0; }
+			12% { opacity: .8; }
+			to { transform: translate3d(var(--drift), -110vh, 0) rotate(25deg); opacity: 0; }
+		}
+
+		.screen {
+			display: none;
+			width: min(100%, 510px);
+			text-align: center;
+			animation: arrive .55s cubic-bezier(.2,.8,.2,1) both;
+		}
+
+		.screen.active { display: block; }
+		@keyframes arrive { from { opacity: 0; transform: translateY(14px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+		.eyebrow {
+			margin: 0 0 12px;
+			color: var(--rose-dark);
+			font-size: .77rem;
+			font-weight: 900;
+			letter-spacing: .13em;
+			text-transform: uppercase;
+		}
+
+		h1, h2, p { margin-top: 0; }
+		h1 { margin-bottom: 10px; font-size: clamp(1.75rem, 7vw, 2.45rem); line-height: 1.13; }
+		h2 { margin-bottom: 12px; font-size: clamp(1.7rem, 7vw, 2.35rem); line-height: 1.18; }
+		.subtitle { margin: 0 auto 25px; color: var(--muted); line-height: 1.6; }
+
+		.envelope-wrap { position: relative; width: min(340px, 83vw); height: 230px; margin: 12px auto 26px; perspective: 900px; }
+		.envelope {
+			position: absolute;
+			inset: auto 0 0;
+			height: 190px;
+			border-radius: 12px;
+			background: linear-gradient(145deg, #f8a9bc, #e9789a);
+			box-shadow: 0 20px 38px rgba(196, 88, 126, .23);
+		}
+
+		.envelope::before, .envelope::after { position: absolute; inset: 0; content: ""; border-radius: inherit; }
+		.envelope::before { background: linear-gradient(32deg, transparent 49.5%, rgba(255,240,244,.58) 50%, transparent 50.8%), linear-gradient(-32deg, transparent 49.5%, rgba(255,240,244,.5) 50%, transparent 50.8%); }
+		.envelope::after { background: linear-gradient(145deg, #f5a4b9, #e77396); clip-path: polygon(0 0, 100% 0, 50% 58%); }
+
+		.letter {
+			position: absolute;
+			z-index: 1;
+			left: 7%;
+			bottom: 15px;
+			display: grid;
+			width: 86%;
+			height: 175px;
+			place-items: center;
+			border-radius: 8px;
+			background: var(--paper);
+			box-shadow: 0 5px 15px rgba(115, 52, 82, .12);
+			color: var(--rose-dark);
+			font-size: 1.2rem;
+			font-weight: 900;
+			transform: translateY(0);
+			transition: transform .8s cubic-bezier(.2,.8,.2,1) .15s;
+		}
+
+		.flap {
+			position: absolute;
+			z-index: 3;
+			top: 40px;
+			left: 0;
+			width: 100%;
+			height: 145px;
+			background: linear-gradient(145deg, #ffc3d0, #f18ba7);
+			clip-path: polygon(0 0, 100% 0, 50% 100%);
+			transform-origin: top center;
+			transition: transform .55s ease, z-index 0s .25s;
+		}
+
+		.seal {
+			position: absolute;
+			z-index: 4;
+			top: 102px;
+			left: 50%;
+			display: grid;
+			width: 46px;
+			height: 46px;
+			place-items: center;
+			border: 3px solid rgba(255,255,255,.7);
+			border-radius: 50%;
+			background: var(--rose-dark);
+			color: white;
+			font-size: 1.2rem;
+			transform: translateX(-50%);
+			transition: opacity .2s ease;
+		}
+
+		.envelope-wrap.open .flap { z-index: 0; transform: rotateX(180deg); }
+		.envelope-wrap.open .letter { transform: translateY(-85px); }
+		.envelope-wrap.open .seal { opacity: 0; }
+		.primary { color: white; background: var(--rose); box-shadow: 0 9px 22px rgba(205, 66, 106, .23); }
+		.primary:hover { background: var(--rose-dark); box-shadow: 0 12px 26px rgba(205, 66, 106, .28); }
+
+		.question-card, .date-card {
+			padding: clamp(25px, 7vw, 42px);
+			border: 1px solid rgba(255,255,255,.86);
+			border-radius: 26px;
+			background: rgba(255, 253, 251, .82);
+			box-shadow: var(--shadow);
+			backdrop-filter: blur(12px);
+		}
+
+		.question-card h1 { margin-bottom: 10px; }
+		.question-card .subtitle { margin-bottom: 24px; }
+		.answer-row { display: flex; justify-content: center; gap: 14px; min-height: 58px; }
+		.yes-button { min-width: 142px; color: white; background: var(--rose); box-shadow: 0 8px 18px rgba(205,66,106,.2); }
+		.no-button { min-width: 125px; color: #77526f; background: #f0e4f2; box-shadow: 0 6px 15px rgba(100,60,100,.1); touch-action: manipulation; }
+		.tease {
+			position: fixed;
+			z-index: 10;
+			left: 50%;
+			bottom: max(24px, env(safe-area-inset-bottom));
+			max-width: calc(100vw - 32px);
+			padding: 12px 19px;
+			border: 1px solid rgba(255,255,255,.8);
+			border-radius: 999px;
+			background: #fffdfb;
+			box-shadow: 0 8px 28px rgba(120,55,93,.17);
+			color: var(--rose-dark);
+			font-weight: 900;
+			opacity: 0;
+			pointer-events: none;
+			transform: translate(-50%, 12px);
+			transition: opacity .2s, transform .2s;
+			white-space: nowrap;
+		}
+
+		.tease.show { opacity: 1; transform: translate(-50%, 0); }
+		.celebration { margin-bottom: 23px; font-size: 3rem; animation: pop .65s cubic-bezier(.2,1.5,.5,1) both; }
+		@keyframes pop { from { opacity: 0; transform: scale(.3) rotate(-15deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
+
+		.date-card { text-align: left; }
+		.date-card h2, .date-card .subtitle { text-align: center; }
+		.date-card .subtitle { margin-bottom: 24px; }
+		.field { display: block; margin: 0 0 17px; color: var(--ink); font-weight: 800; }
+		.field span { display: block; margin-bottom: 8px; }
+		.field input {
+			width: 100%;
+			min-height: 52px;
+			padding: 0 14px;
+			border: 1px solid var(--line);
+			border-radius: 12px;
+			background: #fff;
+			color: var(--ink);
+		}
+
+		.date-card .primary { display: block; width: 100%; margin-top: 8px; }
+		.final-card { padding: 38px 28px; border-radius: 26px; background: rgba(255,253,251,.84); box-shadow: var(--shadow); }
+		.final-card .subtitle { margin-bottom: 0; }
+		.date-summary { margin: 20px 0 0; padding-top: 17px; border-top: 1px dashed #e9bfd0; color: var(--muted); line-height: 1.8; }
+		.confetti-piece { position: fixed; z-index: 20; top: -15px; left: var(--x); width: var(--w); height: var(--h); border-radius: 3px; background: var(--color); pointer-events: none; animation: confetti-fall var(--fall) cubic-bezier(.2,.6,.5,1) forwards; }
+		@keyframes confetti-fall { to { transform: translate3d(var(--drift), 110vh, 0) rotate(var(--spin)); opacity: .8; } }
+
+		@media (max-width: 420px) {
+			.scene { padding: 22px 16px; }
+			.envelope-wrap { height: 215px; margin-top: 4px; }
+			.envelope { height: 176px; }
+			.flap { top: 39px; height: 133px; }
+			.seal { top: 94px; }
+			.envelope-wrap.open .letter { transform: translateY(-77px); }
+			.answer-row { gap: 10px; }
+			.yes-button, .no-button { min-width: 0; padding: 0 23px; }
+			.question-card, .date-card { border-radius: 22px; }
+		}
+
+		@media (prefers-reduced-motion: reduce) {
+			*, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+		}
+	</style>
+</head>
+<body>
+	<div class="heart-field" id="heartField" aria-hidden="true"></div>
+	<main class="scene">
+		<section class="screen active" id="opening" aria-labelledby="opening-title">
+			<p class="eyebrow">A tiny delivery, just for you</p>
+			<h1 id="opening-title">💌 You have a special surprise! 💌</h1>
+			<p class="subtitle">Hand-delivered with love (and only a little bit of nervousness).</p>
+			<div class="envelope-wrap" id="envelope" aria-hidden="true">
+				<div class="letter">For my favorite person 💗</div>
+				<div class="envelope"></div>
+				<div class="flap"></div>
+				<div class="seal">♥</div>
+			</div>
+			<button class="primary" id="openButton" type="button">Open the Envelope 💕</button>
+		</section>
+
+		<section class="screen" id="question" aria-labelledby="question-title" aria-hidden="true">
+			<div class="question-card">
+				<p class="eyebrow">One very important question</p>
+				<h1 id="question-title">Will you bembang with me? 😏❤️</h1>
+				<p class="subtitle">Choose wisely. One of these buttons has commitment issues.</p>
+				<div class="answer-row">
+					<button class="yes-button" id="yesButton" type="button">YES ❤️</button>
+					<button class="no-button" id="noButton" type="button" aria-label="No, try to catch me">NO 😭</button>
+				</div>
+			</div>
+		</section>
+
+		<section class="screen" id="date" aria-labelledby="date-title" aria-hidden="true">
+			<div class="celebration" aria-hidden="true">🥳💖🎉</div>
+			<p class="eyebrow">Correct answer, obviously</p>
+			<h1>YAYYY! ❤️ I knew you'd say yes! 😏</h1>
+			<p class="subtitle">Now let's make this extremely official.</p>
+			<form class="date-card" id="dateForm">
+				<h2 id="date-title">💕 Our Bembang Date 💕</h2>
+				<p class="subtitle">Pick the details, cutie.</p>
+				<label class="field" for="dateInput"><span>When? 📅</span><input id="dateInput" name="date" type="date" required></label>
+				<label class="field" for="timeInput"><span>What time? ⏰</span><input id="timeInput" name="time" type="time" required></label>
+				<label class="field" for="placeInput"><span>Where? 📍</span><input id="placeInput" name="place" type="text" placeholder="Your dream date spot" maxlength="100" required></label>
+				<button class="primary" type="submit">Confirm our date 💕</button>
+			</form>
+		</section>
+
+		<section class="screen" id="final" aria-labelledby="final-title" aria-hidden="true">
+			<div class="final-card">
+				<div class="celebration" aria-hidden="true">💌💞✨</div>
+				<p class="eyebrow">It is officially official</p>
+				<h2 id="final-title">It's a date! ❤️😏</h2>
+				<p class="subtitle">No refunds. No cancellations. You already said YES. 😂❤️</p>
+				<p class="date-summary" id="dateSummary"></p>
+			</div>
+		</section>
+	</main>
+	<div class="tease" id="tease" role="status" aria-live="polite"></div>
+
+	<script>
+		const screens = [...document.querySelectorAll('.screen')];
+		const envelope = document.querySelector('#envelope');
+		const openButton = document.querySelector('#openButton');
+		const noButton = document.querySelector('#noButton');
+		const tease = document.querySelector('#tease');
+		const jokes = ['Are you sure? 😭', 'Try again 😂', 'Nope! 😏', "You can't escape! 😂", 'Think carefully 👀', 'Wrong button! 😆'];
+		let teaseTimer;
+		let jokeIndex = 0;
+
+		function showScreen(id) {
+			screens.forEach((screen) => {
+				const active = screen.id === id;
+				screen.classList.toggle('active', active);
+				screen.setAttribute('aria-hidden', String(!active));
+			});
+		}
+
+		openButton.addEventListener('click', () => {
+			openButton.disabled = true;
+			envelope.classList.add('open');
+			window.setTimeout(() => showScreen('question'), 820);
+		});
+
+		function dodgeNo(event) {
+			event.preventDefault();
+			const padding = 14;
+			const maxX = Math.max(padding, window.innerWidth - noButton.offsetWidth - padding);
+			const maxY = Math.max(padding, window.innerHeight - noButton.offsetHeight - padding);
+			noButton.style.position = 'fixed';
+			noButton.style.left = `${padding + Math.random() * (maxX - padding)}px`;
+			noButton.style.top = `${padding + Math.random() * (maxY - padding)}px`;
+			noButton.style.zIndex = '8';
+			tease.textContent = jokes[jokeIndex++ % jokes.length];
+			tease.classList.add('show');
+			window.clearTimeout(teaseTimer);
+			teaseTimer = window.setTimeout(() => tease.classList.remove('show'), 1500);
+		}
+
+		noButton.addEventListener('pointerenter', (event) => {
+			if (event.pointerType === 'mouse') dodgeNo(event);
+		});
+		noButton.addEventListener('pointerdown', dodgeNo);
+		noButton.addEventListener('click', (event) => {
+			event.preventDefault();
+			event.stopPropagation();
+			dodgeNo(event);
+		});
+
+		function makeConfetti() {
+			const colors = ['#f25f85', '#ffbf69', '#a78bdb', '#75c9b7', '#ffe27a', '#f49ac2'];
+			for (let index = 0; index < 90; index += 1) {
+				const piece = document.createElement('i');
+				piece.className = 'confetti-piece';
+				piece.style.setProperty('--x', `${Math.random() * 100}vw`);
+				piece.style.setProperty('--w', `${5 + Math.random() * 7}px`);
+				piece.style.setProperty('--h', `${7 + Math.random() * 9}px`);
+				piece.style.setProperty('--color', colors[index % colors.length]);
+				piece.style.setProperty('--fall', `${2.2 + Math.random() * 2.1}s`);
+				piece.style.setProperty('--drift', `${Math.random() * 180 - 90}px`);
+				piece.style.setProperty('--spin', `${Math.random() * 1000 - 500}deg`);
+				document.body.append(piece);
+				window.setTimeout(() => piece.remove(), 4500);
+			}
+		}
+
+		document.querySelector('#yesButton').addEventListener('click', () => {
+			showScreen('date');
+			makeConfetti();
+			document.querySelector('#dateInput').min = new Date().toISOString().slice(0, 10);
+		});
+
+		document.querySelector('#dateForm').addEventListener('submit', (event) => {
+			event.preventDefault();
+			const data = new FormData(event.currentTarget);
+			const date = new Date(`${data.get('date')}T00:00:00`).toLocaleDateString(undefined, { dateStyle: 'long' });
+			const time = new Date(`2000-01-01T${data.get('time')}`).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+			document.querySelector('#dateSummary').textContent = `${date} at ${time} · ${data.get('place')}`;
+			showScreen('final');
+			makeConfetti();
+		});
+
+		const heartField = document.querySelector('#heartField');
+		for (let index = 0; index < 18; index += 1) {
+			const heart = document.createElement('span');
+			heart.className = 'float-heart';
+			heart.textContent = ['♡', '♥', '✿'][index % 3];
+			heart.style.left = `${Math.random() * 100}%`;
+			heart.style.setProperty('--size', `${14 + Math.random() * 22}px`);
+			heart.style.setProperty('--duration', `${12 + Math.random() * 14}s`);
+			heart.style.setProperty('--delay', `${-Math.random() * 24}s`);
+			heart.style.setProperty('--drift', `${Math.random() * 90 - 45}px`);
+			heartField.append(heart);
+		}
+	</script>
+</body>
+</html>
